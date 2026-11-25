@@ -1,7 +1,7 @@
-import os, asyncio
+import os, asyncio, signal
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from pyrogram.errors import FloodWait, UserAlreadyParticipant
+from pyrogram.errors import FloodWait
 
 API_ID = int(os.environ["API_ID"])
 API_HASH = os.environ["API_HASH"]
@@ -54,8 +54,13 @@ async def handle_link(client, msg: Message):
 
 async def main():
     await bot.start()
-    print("Bot started")
-    await bot.idle()
+    print("Bot started ✅")
+    stop_event = asyncio.Event()
+    loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGTERM, stop_event.set)
+    loop.add_signal_handler(signal.SIGINT, stop_event.set)
+    await stop_event.wait()
+    await bot.stop()
 
 if __name__ == "__main__":
     asyncio.run(main())
